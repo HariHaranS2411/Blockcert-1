@@ -2,4 +2,19 @@
 name = "blockcert"
 version = "0.1.0"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "Flask>=3.0.0",
+    "Flask-SQLAlchemy>=3.1.1",
+    "Flask-Login>=0.6.3",
+    "Flask-WTF>=1.2.1",
+    "Flask-Migrate>=4.0.5",
+    "WTForms>=3.1.1",
+    "web3>=6.15.0",
+    "qrcode[pil]>=7.4.2",
+    "Pillow>=10.0.0",
+    "python-dotenv>=1.0.0",
+    "PyMySQL>=1.1.0",
+    "cryptography>=42.0.0",
+    "email-validator>=2.1.0",
+    "pytest>=8.0.0"
+]
