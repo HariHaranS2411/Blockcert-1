@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Verification History - BlockCert{% endblock %}
+
+{% block content %}
+<div class="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-8 w-full space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-on-surface">Verification Audit History</h1>
+            <p class="text-xs md:text-sm text-on-surface-variant mt-1">Full audit trail of all candidate certificate verification queries.</p>
+        </div>
+        <a href="{{ url_for('employer.dashboard') }}" class="border border-outline-variant text-on-surface hover:bg-surface-container-low font-semibold text-xs px-4 py-2 rounded-xl transition-colors">
+            Back to Search
+        </a>
+    </div>
+
+    <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/40 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-surface-container-low border-b border-outline-variant/30 text-xs font-semibold text-on-surface-variant">
+                        <th class="p-4">Certificate ID</th>
+                        <th class="p-4">Result</th>
+                        <th class="p-4">Attempted Hash</th>
+                        <th class="p-4">Verification Timestamp</th>
+                        <th class="p-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="text-xs divide-y divide-outline-variant/20">
+                    {% if logs %}
+                        {% for log in logs %}
+                            <tr class="hover:bg-surface-container-low/50 transition-colors">
+                                <td class="p-4 font-mono font-bold text-on-surface">{{ log.certificate_id }}</td>
+                                <td class="p-4">
+                                    {% if log.result == 'verified' %}
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-semibold border border-secondary/20">
+                                            <span class="material-symbols-outlined text-[12px] fill">check_circle</span>
+                                            <span>VERIFIED</span>
+                                        </span>
+                                    {% elif log.result == 'tampered' %}
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-error-container text-on-error-container text-[10px] font-semibold border border-error/20">
+                                            <span class="material-symbols-outlined text-[12px] fill">warning</span>
+                                            <span>TAMPERED</span>
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-[10px] font-semibold">
+                                            <span>NOT FOUND</span>
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-4 font-mono text-[11px] text-outline truncate max-w-[150px]">
+                                    {{ log.attempted_hash or 'N/A' }}
+                                </td>
+                                <td class="p-4 text-on-surface-variant">{{ log.created_at.strftime('%b %d, %Y %H:%M:%S UTC') }}</td>
+                                <td class="p-4 text-right">
+                                    <a href="{{ url_for('verify.verify_certificate_view', certificate_id=log.certificate_id) }}" class="text-primary hover:underline font-semibold text-xs">
+                                        Re-Verify
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="p-8 text-center text-on-surface-variant">
+                                No verification logs found in your account history.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

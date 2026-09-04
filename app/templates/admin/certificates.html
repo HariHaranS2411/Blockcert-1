@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Issued Certificates - BlockCert{% endblock %}
+
+{% block content %}
+<div class="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-8 w-full space-y-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-on-surface">Issued Certificates</h1>
+            <p class="text-xs md:text-sm text-on-surface-variant mt-1">Registry of all credentials anchored to the smart contract.</p>
+        </div>
+        <a href="{{ url_for('admin.upload') }}" class="bg-primary text-on-primary px-4 py-2.5 rounded-xl text-xs font-semibold hover:bg-primary-container transition-colors shadow-sm flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[18px]">add_circle</span>
+            <span>Issue New Certificate</span>
+        </a>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="bg-surface-container-lowest p-4 rounded-2xl shadow-sm border border-outline-variant/40">
+        <form method="GET" action="{{ url_for('admin.certificates_list') }}" class="flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-grow">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
+                <input type="text" name="search" value="{{ search }}" placeholder="Filter by Student, Certificate ID, Course, or Roll Number..." class="w-full pl-9 pr-3 py-2 bg-surface rounded-xl border border-outline-variant/60 text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+            </div>
+            <button type="submit" class="bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-semibold text-xs px-5 py-2 rounded-xl transition-colors shrink-0">
+                Filter
+            </button>
+            {% if search %}
+                <a href="{{ url_for('admin.certificates_list') }}" class="border border-outline-variant text-on-surface-variant hover:bg-surface-container-low font-semibold text-xs px-4 py-2 rounded-xl transition-colors flex items-center justify-center">
+                    Clear
+                </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Certificates Table -->
+    <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/40 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-surface-container-low border-b border-outline-variant/30 text-xs font-semibold text-on-surface-variant">
+                        <th class="p-4">Certificate ID</th>
+                        <th class="p-4">Student</th>
+                        <th class="p-4">Roll Number</th>
+                        <th class="p-4">Course / Degree</th>
+                        <th class="p-4">SHA-256 Hash</th>
+                        <th class="p-4">Date Minted</th>
+                        <th class="p-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="text-xs divide-y divide-outline-variant/20">
+                    {% if certificates %}
+                        {% for cert in certificates %}
+                            <tr class="hover:bg-surface-container-low/50 transition-colors">
+                                <td class="p-4 font-mono font-bold text-primary">{{ cert.certificate_id }}</td>
+                                <td class="p-4 font-semibold text-on-surface">{{ cert.student.user.name if cert.student and cert.student.user else 'N/A' }}</td>
+                                <td class="p-4 text-on-surface-variant font-mono">{{ cert.student.roll_number if cert.student else 'N/A' }}</td>
+                                <td class="p-4 text-on-surface-variant">{{ cert.course }}</td>
+                                <td class="p-4 font-mono text-[11px] text-outline truncate max-w-[140px]" title="{{ cert.sha256_hash }}">
+                                    {{ cert.sha256_hash[:10] }}...{{ cert.sha256_hash[-8:] }}
+                                </td>
+                                <td class="p-4 text-on-surface-variant">{{ cert.created_at.strftime('%b %d, %Y') }}</td>
+                                <td class="p-4 text-right">
+                                    <div class="flex items-center justify-end gap-1">
+                                        <a href="{{ url_for('verify.verify_certificate_view', certificate_id=cert.certificate_id) }}" target="_blank" class="p-1.5 text-primary hover:bg-surface-container rounded-lg" title="Verify Online">
+                                            <span class="material-symbols-outlined text-[18px]">verified</span>
+                                        </a>
+                                        <a href="{{ url_for('student.get_qr_code', certificate_id=cert.certificate_id) }}" target="_blank" class="p-1.5 text-on-surface-variant hover:bg-surface-container rounded-lg" title="View QR Code">
+                                            <span class="material-symbols-outlined text-[18px]">qr_code</span>
+                                        </a>
+                                        <a href="{{ url_for('student.download_certificate', certificate_id=cert.certificate_id) }}" class="p-1.5 text-on-surface-variant hover:bg-surface-container rounded-lg" title="Download Document">
+                                            <span class="material-symbols-outlined text-[18px]">download</span>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="p-8 text-center text-on-surface-variant">
+                                No certificates match your search query.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

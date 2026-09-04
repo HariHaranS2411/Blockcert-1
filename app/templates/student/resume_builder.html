@@ -1,0 +1,474 @@
+{% extends "base.html" %}
+
+{% block title %}AI Resume Maker - BlockCert{% endblock %}
+
+{% block content %}
+<div class="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-8 w-full space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-outline-variant/30 pb-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-2xl fill">auto_awesome</span>
+                <h1 class="text-2xl md:text-3xl font-bold text-on-surface">AI Resume Maker</h1>
+                <span class="bg-primary-container text-on-primary-container text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                    Interactive AI Coach
+                </span>
+            </div>
+            <p class="text-xs md:text-sm text-on-surface-variant mt-1">
+                Conduct an AI interview, polish project descriptions, and stamp your verified BlockCert blockchain credentials.
+            </p>
+        </div>
+        <div class="flex gap-2">
+            <button onclick="saveResumeDraft()" id="save-btn" class="border border-outline-variant text-on-surface hover:bg-surface-container-low text-xs font-semibold px-4 py-2.5 rounded-xl transition-colors flex items-center gap-1.5 shadow-sm">
+                <span class="material-symbols-outlined text-[16px]">save</span>
+                <span>Save Draft</span>
+            </button>
+            <a href="{{ url_for('student.resume_preview') }}" class="bg-primary text-on-primary hover:bg-primary-container text-xs font-bold px-5 py-2.5 rounded-xl transition-all shadow-md flex items-center gap-1.5 active:scale-95">
+                <span class="material-symbols-outlined text-[16px]">visibility</span>
+                <span>Preview &amp; Export</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main 2-Column Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left Column: Interactive AI Interview Chat Assistant (5 cols) -->
+        <div class="lg:col-span-5 flex flex-col bg-surface-container-lowest rounded-2xl shadow-sm border border-outline-variant/40 h-[720px] overflow-hidden">
+            <!-- Chat Header -->
+            <div class="p-4 bg-surface-container-low border-b border-outline-variant/30 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-primary text-on-primary flex items-center justify-center shadow-sm">
+                        <span class="material-symbols-outlined text-lg fill">smart_toy</span>
+                    </div>
+                    <div>
+                        <h2 class="text-xs font-bold text-on-surface">BlockCert AI Career Coach</h2>
+                        <span class="text-[10px] text-secondary font-semibold flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Interactive Interview
+                        </span>
+                    </div>
+                </div>
+                <button onclick="restartInterview()" class="text-[11px] text-primary hover:underline font-semibold flex items-center gap-0.5">
+                    <span class="material-symbols-outlined text-[14px]">refresh</span> Restart
+                </button>
+            </div>
+
+            <!-- Chat Messages Container -->
+            <div id="chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3.5 text-xs">
+                <!-- AI Welcome Message populated via JS -->
+            </div>
+
+            <!-- Chat Input Bar -->
+            <div class="p-3 bg-surface-container-low border-t border-outline-variant/30">
+                <form id="chat-form" onsubmit="handleSendReply(event)" class="flex gap-2">
+                    <input type="text" id="chat-input" placeholder="Type your answer here..." class="flex-grow bg-surface border border-outline-variant/60 rounded-xl px-3.5 py-2.5 text-xs text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none" autocomplete="off" />
+                    <button type="submit" id="chat-send-btn" class="bg-primary text-on-primary hover:bg-primary-container p-2.5 rounded-xl transition-all shrink-0 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-sm">send</span>
+                    </button>
+                </form>
+                <span class="text-[10px] text-outline block mt-1 text-center">AI polishes facts without inventing false information.</span>
+            </div>
+        </div>
+
+        <!-- Right Column: Visual Sections & Real-Time Builder (7 cols) -->
+        <div class="lg:col-span-7 space-y-6 max-h-[720px] overflow-y-auto pr-1">
+
+            <!-- CGPA Strategy Banner -->
+            <div class="bg-primary text-on-primary p-5 rounded-2xl shadow-md border border-primary-container relative overflow-hidden">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 bg-white/10 px-2.5 py-0.5 rounded-full text-[10px] font-bold text-primary-fixed mb-1.5">
+                            <span class="material-symbols-outlined text-[12px] fill">insights</span>
+                            <span>{{ cgpa_strategy.strategy_title }}</span>
+                        </div>
+                        <h3 class="text-sm font-bold text-on-primary">CGPA {{ cgpa_strategy.cgpa or student.cgpa or 'N/A' }} Recommendation</h3>
+                        <p class="text-xs text-primary-fixed-dim mt-1 leading-relaxed">
+                            {{ cgpa_strategy.ai_recommendation }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 1: BlockCert Verified Certificates Synchronization -->
+            <div class="bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-outline-variant/40 space-y-3">
+                <div class="flex justify-between items-center border-b border-outline-variant/30 pb-2.5">
+                    <h3 class="text-xs font-bold text-on-surface flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-secondary text-base fill">verified</span>
+                        <span>Blockchain-Verified Certificates ({{ certificates|length }})</span>
+                    </h3>
+                    <span class="text-[10px] text-secondary font-bold uppercase tracking-wider">Zero-Trust Verified ✓</span>
+                </div>
+
+                {% if certificates %}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="certs-container">
+                        {% for cert in certificates %}
+                            <div class="bg-surface-container-low border border-secondary/30 p-3 rounded-xl flex items-start justify-between gap-2">
+                                <div class="space-y-1">
+                                    <div class="font-bold text-xs text-on-surface">{{ cert.course }}</div>
+                                    <div class="text-[10px] text-on-surface-variant">{{ cert.issuer.college_name if cert.issuer and cert.issuer.college_name else 'BlockCert Institute' }}</div>
+                                    <div class="flex items-center gap-1 text-[9px] font-mono text-secondary">
+                                        <span class="material-symbols-outlined text-[11px] fill">shield</span>
+                                        <span>{{ cert.certificate_id }}</span>
+                                    </div>
+                                </div>
+                                <input type="checkbox" checked class="rounded border-secondary text-secondary focus:ring-secondary mt-1 cert-include-cb" data-id="{{ cert.certificate_id }}" data-course="{{ cert.course }}" data-tx="{{ cert.blockchain_tx_hash }}" />
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-xs text-on-surface-variant">No issued certificates found yet. Once minted by an administrator, they will be auto-synced here.</p>
+                {% endif %}
+            </div>
+
+            <!-- Section 2: Technical Skills Matrix -->
+            <div class="bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-outline-variant/40 space-y-3">
+                <div class="flex justify-between items-center border-b border-outline-variant/30 pb-2.5">
+                    <h3 class="text-xs font-bold text-on-surface flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-primary text-base">code</span>
+                        <span>Technical Skills &amp; Stack</span>
+                    </h3>
+                    <button onclick="extractSkillsFromCerts()" class="text-[11px] text-primary font-bold hover:underline flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">auto_awesome</span>
+                        <span>Auto-Extract from Certs</span>
+                    </button>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-[11px] font-semibold text-on-surface-variant block mb-1">Programming Languages (comma separated)</label>
+                        <input type="text" id="skills-languages" value="Python, JavaScript, SQL, C++" class="w-full bg-surface border border-outline-variant/60 rounded-xl px-3 py-2 text-xs text-on-surface focus:border-primary outline-none" />
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-semibold text-on-surface-variant block mb-1">Frameworks, Databases &amp; Tools</label>
+                        <input type="text" id="skills-tools" value="Flask, MySQL, Git, REST APIs, HTML5/CSS3" class="w-full bg-surface border border-outline-variant/60 rounded-xl px-3 py-2 text-xs text-on-surface focus:border-primary outline-none" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Projects & AI Wording Enhancer -->
+            <div class="bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-outline-variant/40 space-y-4">
+                <div class="flex justify-between items-center border-b border-outline-variant/30 pb-2.5">
+                    <h3 class="text-xs font-bold text-on-surface flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-primary text-base">developer_board</span>
+                        <span>Projects (with AI Action-Verb Polish)</span>
+                    </h3>
+                    <button onclick="addProjectRow()" class="text-[11px] text-primary font-bold hover:underline flex items-center gap-0.5">
+                        <span class="material-symbols-outlined text-[14px]">add</span> Add Project
+                    </button>
+                </div>
+
+                <div id="projects-container" class="space-y-3">
+                    <!-- Project item 1 -->
+                    <div class="p-3.5 bg-surface-container-low rounded-xl border border-outline-variant/40 space-y-2.5 project-card">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="text-[10px] font-semibold text-on-surface-variant block">Project Name</label>
+                                <input type="text" class="w-full bg-surface border border-outline-variant/60 rounded-lg px-2.5 py-1.5 text-xs text-on-surface project-title" value="Decentralized Certificate Verification System" />
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-semibold text-on-surface-variant block">Tech Stack Used</label>
+                                <input type="text" class="w-full bg-surface border border-outline-variant/60 rounded-lg px-2.5 py-1.5 text-xs text-on-surface project-tech" value="Python, Flask, Web3, MySQL, Solidity" />
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-[10px] font-semibold text-on-surface-variant">Description &amp; Contributions (Bullet Points)</label>
+                                <button type="button" onclick="polishProjectBullets(this)" class="text-[10px] bg-primary text-on-primary font-bold px-2 py-0.5 rounded-md hover:bg-primary-container transition-colors flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[11px]">auto_awesome</span>
+                                    <span>Polish with AI</span>
+                                </button>
+                            </div>
+                            <textarea rows="3" class="w-full bg-surface border border-outline-variant/60 rounded-lg p-2.5 text-xs text-on-surface project-desc focus:border-primary outline-none">Developed a full-stack certificate verification portal utilizing SHA-256 cryptographic hashing.
+Integrated smart contract transaction confirmation on Ganache EVM to guarantee credential authenticity.</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Professional Summary -->
+            <div class="bg-surface-container-lowest p-5 rounded-2xl shadow-sm border border-outline-variant/40 space-y-2.5">
+                <div class="flex justify-between items-center border-b border-outline-variant/30 pb-2">
+                    <h3 class="text-xs font-bold text-on-surface flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-primary text-base">badge</span>
+                        <span>Professional Summary</span>
+                    </h3>
+                    <button type="button" onclick="polishSummary()" class="text-[11px] text-primary font-bold hover:underline flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[13px]">auto_awesome</span>
+                        <span>AI Polish</span>
+                    </button>
+                </div>
+                <textarea id="resume-summary" rows="3" class="w-full bg-surface border border-outline-variant/60 rounded-xl p-3 text-xs text-on-surface focus:border-primary outline-none">Results-driven {{ student.degree }} candidate with strong foundations in software development and verified blockchain-anchored academic credentials. Proven ability to design and deploy full-stack applications with focus on security and performance.</textarea>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    let interviewStep = 0;
+    let interviewState = {};
+
+    // Start interview on load
+    document.addEventListener('DOMContentLoaded', () => {
+        sendInterviewStep(0, '');
+    });
+
+    async function sendInterviewStep(step, message) {
+        try {
+            const res = await fetch("{{ url_for('student.resume_interview') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    step: step,
+                    message: message,
+                    state: interviewState
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                interviewStep = data.next_step;
+                interviewState = data.state;
+                appendAIMessage(data.ai_message);
+
+                // Auto-sync extracted items into visual builder
+                syncStateToBuilder(interviewState);
+            }
+        } catch (e) {
+            console.error('Interview error:', e);
+        }
+    }
+
+    function handleSendReply(e) {
+        e.preventDefault();
+        const input = document.getElementById('chat-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        appendUserMessage(text);
+        input.value = '';
+        sendInterviewStep(interviewStep, text);
+    }
+
+    function appendAIMessage(msg) {
+        const box = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = 'bg-surface-container-low p-3.5 rounded-2xl rounded-tl-sm border border-outline-variant/30 text-on-surface space-y-1';
+        
+        // Simple Markdown to HTML rendering
+        let formatted = msg
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`(.*?)`/g, '<code class="bg-black/10 px-1 py-0.5 rounded text-[11px] font-mono">$1</code>')
+            .replace(/\n\n/g, '<br/><br/>')
+            .replace(/\n/g, '<br/>');
+
+        div.innerHTML = `<div class="flex items-center gap-1.5 text-primary font-bold text-[11px] mb-1">
+            <span class="material-symbols-outlined text-sm fill">auto_awesome</span> BlockCert AI Coach
+        </div><div>${formatted}</div>`;
+        
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function appendUserMessage(msg) {
+        const box = document.getElementById('chat-messages');
+        const div = document.createElement('div');
+        div.className = 'bg-primary text-on-primary p-3 rounded-2xl rounded-tr-sm ml-auto max-w-[85%] text-right font-medium';
+        div.textContent = msg;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function restartInterview() {
+        document.getElementById('chat-messages').innerHTML = '';
+        interviewStep = 0;
+        interviewState = {};
+        sendInterviewStep(0, '');
+    }
+
+    function syncStateToBuilder(state) {
+        if (state.technical_skills) {
+            if (state.technical_skills.languages) {
+                document.getElementById('skills-languages').value = state.technical_skills.languages.join(', ');
+            }
+            if (state.technical_skills.frameworks_and_tools) {
+                document.getElementById('skills-tools').value = state.technical_skills.frameworks_and_tools.join(', ');
+            }
+        }
+        if (state.summary) {
+            document.getElementById('resume-summary').value = state.summary;
+        }
+    }
+
+    async function polishProjectBullets(btn) {
+        const card = btn.closest('.project-card');
+        const textarea = card.querySelector('.project-desc');
+        const rawText = textarea.value.trim();
+        if (!rawText) return;
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined text-[11px] animate-spin">refresh</span> Polishing...';
+
+        try {
+            const res = await fetch("{{ url_for('student.resume_polish') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ text: rawText, context_type: 'project' })
+            });
+            const data = await res.json();
+            if (data.success && data.polished) {
+                textarea.value = data.polished;
+            }
+        } catch (e) {
+            console.error('Polish error:', e);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<span class="material-symbols-outlined text-[11px]">auto_awesome</span> Polish with AI';
+        }
+    }
+
+    async function polishSummary() {
+        const textarea = document.getElementById('resume-summary');
+        const rawText = textarea.value.trim();
+        if (!rawText) return;
+
+        try {
+            const res = await fetch("{{ url_for('student.resume_polish') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ text: rawText, context_type: 'summary' })
+            });
+            const data = await res.json();
+            if (data.success && data.polished) {
+                textarea.value = data.polished;
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function extractSkillsFromCerts() {
+        const certCards = document.querySelectorAll('.cert-include-cb:checked');
+        const currentTools = document.getElementById('skills-tools');
+        let additions = ['Solidity', 'Smart Contracts', 'Web3.py', 'SHA-256 Hashing'];
+        currentTools.value = Array.from(new Set([...currentTools.value.split(',').map(s=>s.trim()), ...additions])).join(', ');
+    }
+
+    function addProjectRow() {
+        const container = document.getElementById('projects-container');
+        const div = document.createElement('div');
+        div.className = 'p-3.5 bg-surface-container-low rounded-xl border border-outline-variant/40 space-y-2.5 project-card';
+        div.innerHTML = `
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="text-[10px] font-semibold text-on-surface-variant block">Project Name</label>
+                    <input type="text" class="w-full bg-surface border border-outline-variant/60 rounded-lg px-2.5 py-1.5 text-xs text-on-surface project-title" placeholder="Project Title" />
+                </div>
+                <div>
+                    <label class="text-[10px] font-semibold text-on-surface-variant block">Tech Stack Used</label>
+                    <input type="text" class="w-full bg-surface border border-outline-variant/60 rounded-lg px-2.5 py-1.5 text-xs text-on-surface project-tech" placeholder="e.g. Python, SQL" />
+                </div>
+            </div>
+            <div>
+                <div class="flex justify-between items-center mb-1">
+                    <label class="text-[10px] font-semibold text-on-surface-variant">Description &amp; Contributions</label>
+                    <button type="button" onclick="polishProjectBullets(this)" class="text-[10px] bg-primary text-on-primary font-bold px-2 py-0.5 rounded-md hover:bg-primary-container transition-colors flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[11px]">auto_awesome</span>
+                        <span>Polish with AI</span>
+                    </button>
+                </div>
+                <textarea rows="2" class="w-full bg-surface border border-outline-variant/60 rounded-lg p-2.5 text-xs text-on-surface project-desc" placeholder="Describe your role and key accomplishments..."></textarea>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    async function saveResumeDraft() {
+        const btn = document.getElementById('save-btn');
+        btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span> Saving...';
+
+        // Collect projects
+        const projectCards = document.querySelectorAll('.project-card');
+        const projects = [];
+        projectCards.forEach(card => {
+            const title = card.querySelector('.project-title').value.trim();
+            const tech = card.querySelector('.project-tech').value.split(',').map(s=>s.trim()).filter(Boolean);
+            const desc = card.querySelector('.project-desc').value.trim();
+            if (title) {
+                projects.push({
+                    title: title,
+                    technologies: tech,
+                    polished_bullets: desc.split('\n').map(s=>s.trim()).filter(Boolean)
+                });
+            }
+        });
+
+        // Collect selected certs
+        const certCheckboxes = document.querySelectorAll('.cert-include-cb:checked');
+        const selectedCerts = [];
+        certCheckboxes.forEach(cb => {
+            selectedCerts.push({
+                certificate_id: cb.dataset.id,
+                course: cb.dataset.course,
+                tx_hash: cb.dataset.tx,
+                verified: true
+            });
+        });
+
+        const resumePayload = {
+            personal_info: {
+                name: "{{ current_user.name }}",
+                email: "{{ current_user.email }}",
+                phone: "+91 98765 43210",
+                location: "{{ current_user.college_name or 'India' }}",
+                github: "github.com/{{ current_user.name.lower().replace(' ', '') }}",
+                linkedin: "linkedin.com/in/{{ current_user.name.lower().replace(' ', '') }}"
+            },
+            summary: document.getElementById('resume-summary').value.trim(),
+            academic: {
+                degree: "{{ student.degree }}",
+                department: "{{ student.department }}",
+                college: "{{ current_user.college_name or 'BlockCert Institute' }}",
+                graduation_year: {{ student.graduation_year }},
+                cgpa: {{ student.cgpa or '8.5' }}
+            },
+            technical_skills: {
+                languages: document.getElementById('skills-languages').value.split(',').map(s=>s.trim()).filter(Boolean),
+                frameworks_and_tools: document.getElementById('skills-tools').value.split(',').map(s=>s.trim()).filter(Boolean)
+            },
+            projects: projects,
+            selected_certificates: selectedCerts,
+            cgpa_strategy: interviewState.cgpa_strategy || {{ cgpa_strategy | tojson }}
+        };
+
+        try {
+            const res = await fetch("{{ url_for('student.save_resume') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ resume_data: resumePayload })
+            });
+            const data = await res.json();
+            if (data.success) {
+                btn.innerHTML = '<span class="material-symbols-outlined text-[16px] text-secondary">check_circle</span> Saved!';
+                setTimeout(() => {
+                    btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">save</span> <span>Save Draft</span>';
+                }, 2000);
+            }
+        } catch (e) {
+            btn.innerHTML = 'Save Failed';
+        }
+    }
+</script>
+{% endblock %}

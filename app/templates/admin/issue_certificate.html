@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Issue New Certificate - BlockCert{% endblock %}
+
+{% block content %}
+<div class="flex-grow w-full max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-8 md:py-12">
+    <div class="mb-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-on-background">Issue New Certificate</h1>
+        <p class="text-sm text-on-surface-variant mt-1">Securely mint verifiable academic credentials onto the Ganache Solidity smart contract.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin.issue_certificate') }}" enctype="multipart/form-data" id="issue-form">
+        {{ form.hidden_tag() }}
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Form Area (Left 8 cols) -->
+            <div class="lg:col-span-8 flex flex-col gap-6">
+
+                <!-- Step 1: Student Information -->
+                <section class="bg-surface-container-lowest shadow-sm rounded-2xl p-6 border border-outline-variant/40">
+                    <div class="flex items-center gap-3 mb-6 border-b border-outline-variant/30 pb-3">
+                        <div class="w-7 h-7 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-xs">1</div>
+                        <h2 class="text-base font-bold text-on-surface">Select Student</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-1 md:col-span-2">
+                            <label class="text-xs font-semibold text-on-surface-variant">Registered Student</label>
+                            {{ form.student_id(class="w-full bg-surface border border-outline-variant/60 rounded-xl px-4 py-2.5 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary", id="student-select") }}
+                            {% if form.student_id.errors %}
+                                <span class="text-xs text-error">{{ form.student_id.errors[0] }}</span>
+                            {% endif %}
+                            <p class="text-[11px] text-on-surface-variant mt-0.5">Need to add a student first? <a href="{{ url_for('admin.manage_students') }}" class="text-primary font-semibold hover:underline">Register student here</a>.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Step 2: Certificate Details -->
+                <section class="bg-surface-container-lowest shadow-sm rounded-2xl p-6 border border-outline-variant/40">
+                    <div class="flex items-center gap-3 mb-6 border-b border-outline-variant/30 pb-3">
+                        <div class="w-7 h-7 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-bold text-xs">2</div>
+                        <h2 class="text-base font-bold text-on-surface">Certificate Details</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-1 md:col-span-2">
+                            <label class="text-xs font-semibold text-on-surface-variant">Certificate ID (Unique Public Identifier)</label>
+                            {{ form.certificate_id(class="w-full bg-surface border border-outline-variant/60 rounded-xl px-4 py-2.5 text-sm text-on-surface font-mono focus:border-primary focus:ring-1 focus:ring-primary", placeholder="e.g. CERT-2025-0001", id="cert-id-input") }}
+                            {% if form.certificate_id.errors %}
+                                <span class="text-xs text-error">{{ form.certificate_id.errors[0] }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs font-semibold text-on-surface-variant">Degree / Course Name</label>
+                            {{ form.course(class="w-full bg-surface border border-outline-variant/60 rounded-xl px-4 py-2.5 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary", placeholder="e.g. Bachelor of Science in Computer Science") }}
+                            {% if form.course.errors %}
+                                <span class="text-xs text-error">{{ form.course.errors[0] }}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs font-semibold text-on-surface-variant">Graduation Year</label>
+                            {{ form.graduation_year(class="w-full bg-surface border border-outline-variant/60 rounded-xl px-4 py-2.5 text-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary", placeholder="2025") }}
+                            {% if form.graduation_year.errors %}
+                                <span class="text-xs text-error">{{ form.graduation_year.errors[0] }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Step 3: Document Upload -->
+                <section class="bg-surface-container-lowest shadow-sm rounded-2xl p-6 border border-outline-variant/40">
+                    <div class="flex items-center gap-3 mb-6 border-b border-outline-variant/30 pb-3">
+                        <div class="w-7 h-7 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-bold text-xs">3</div>
+                        <h2 class="text-base font-bold text-on-surface">Upload Certificate File</h2>
+                    </div>
+
+                    <div class="border-2 border-dashed border-outline-variant/60 rounded-2xl p-8 flex flex-col items-center justify-center bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer text-center relative" id="drop-zone" onclick="document.getElementById('certificate_file').click()">
+                        <span class="material-symbols-outlined text-4xl text-primary mb-2">upload_file</span>
+                        <p class="text-sm font-bold text-on-surface mb-1">Select certificate document file</p>
+                        <p class="text-xs text-on-surface-variant mb-4">Supported formats: PDF, PNG, JPG (Max 16MB)</p>
+                        
+                        {{ form.certificate_file(class="hidden", id="certificate_file", onchange="handleFileSelected(this)") }}
+                        
+                        <button type="button" class="bg-surface border border-outline-variant text-on-surface text-xs font-semibold px-4 py-2 rounded-xl hover:bg-surface-container-high transition-colors">
+                            Browse File
+                        </button>
+                        <p id="selected-file-name" class="text-xs font-semibold text-primary mt-3 hidden"></p>
+                    </div>
+                    {% if form.certificate_file.errors %}
+                        <span class="text-xs text-error mt-2 block">{{ form.certificate_file.errors[0] }}</span>
+                    {% endif %}
+                </section>
+            </div>
+
+            <!-- Preview & Action Area (Right 4 cols) -->
+            <div class="lg:col-span-4 flex flex-col gap-6">
+                <!-- Blockchain Issuance Summary Card -->
+                <section class="bg-primary text-on-primary rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col justify-between">
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between border-b border-on-primary/10 pb-3">
+                            <h3 class="text-base font-bold">Issuance Preview</h3>
+                            <span class="material-symbols-outlined text-secondary-fixed-dim fill">shield_locked</span>
+                        </div>
+
+                        <div class="space-y-4 bg-on-primary-fixed/20 p-4 rounded-xl border border-on-primary/10 text-xs">
+                            <div>
+                                <span class="text-[10px] text-primary-fixed-dim uppercase tracking-wider block">Target Network</span>
+                                <div class="flex items-center gap-1.5 mt-0.5">
+                                    <span class="w-2 h-2 rounded-full {% if blockchain_connected %}bg-secondary-fixed-dim{% else %}bg-error{% endif %}"></span>
+                                    <span class="font-bold text-sm text-on-primary">Ganache Local RPC</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <span class="text-[10px] text-primary-fixed-dim uppercase tracking-wider block">Authorized Issuer Address</span>
+                                <span class="font-mono text-[11px] text-on-primary truncate block mt-0.5">
+                                    {{ issuer_address or '0xAutoAssignedAccount' }}
+                                </span>
+                            </div>
+
+                            <div>
+                                <span class="text-[10px] text-primary-fixed-dim uppercase tracking-wider block">Document Hash (SHA-256)</span>
+                                <p id="preview-hash" class="font-mono text-[11px] text-on-primary/80 break-all bg-black/20 p-2 rounded border border-white/5 mt-0.5">
+                                    Awaiting file upload...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 pt-4 border-t border-on-primary/10">
+                        <button type="submit" id="submit-btn" class="w-full bg-secondary text-on-secondary font-bold text-sm px-6 py-3.5 rounded-xl shadow-md hover:bg-secondary-container hover:text-on-secondary-container transition-all flex items-center justify-center gap-2 active:scale-95">
+                            <span class="material-symbols-outlined fill text-lg">workspace_premium</span>
+                            <span>Mint On Blockchain</span>
+                        </button>
+                        <p class="text-[11px] text-primary-fixed-dim text-center mt-2">
+                            Mints an immutable record on Ganache &amp; creates verification QR.
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    function handleFileSelected(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const nameEl = document.getElementById('selected-file-name');
+            nameEl.textContent = 'Selected: ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+            nameEl.classList.remove('hidden');
+
+            // Auto-calculate SHA-256 on client for instant preview
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const buffer = e.target.result;
+                const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                document.getElementById('preview-hash').textContent = hashHex;
+            };
+            reader.readAsArrayBuffer(file);
+        }
+    }
+</script>
+{% endblock %}

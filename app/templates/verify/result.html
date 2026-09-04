@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}BlockCert - Verification Result ({{ certificate_id }}){% endblock %}
+
+{% block content %}
+<div class="flex-grow w-full max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-8 md:py-12">
+
+    {% if result == 'verified' %}
+        <!-- Status Banner: VERIFIED -->
+        <div class="bg-surface-container-lowest verified-shadow verified-border rounded-2xl p-8 mb-8 text-center flex flex-col items-center justify-center">
+            <div class="bg-secondary-container text-on-secondary-container rounded-full p-4 mb-4 inline-flex items-center justify-center">
+                <span class="material-symbols-outlined text-5xl fill">check_circle</span>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-secondary mb-2 tracking-tight">VERIFIED AUTHENTIC</h1>
+            <p class="text-base text-on-surface-variant max-w-2xl mx-auto">
+                This certificate has been cryptographically validated against the blockchain record. The document is authentic and unmodified.
+            </p>
+        </div>
+
+        <!-- Details Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Left Column: Certificate Details -->
+            <div class="lg:col-span-8 bg-surface-container-lowest verified-shadow rounded-2xl p-6 md:p-8 border border-outline-variant/40">
+                <h2 class="text-xl font-bold text-on-surface flex items-center gap-2 mb-6 border-b border-outline-variant/30 pb-3">
+                    <span class="material-symbols-outlined text-primary">badge</span>
+                    <span>Certificate Details</span>
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-surface-container-low p-4 rounded-xl">
+                        <span class="text-xs font-semibold text-on-surface-variant block mb-1">Student Name</span>
+                        <span class="text-lg font-bold text-on-surface">
+                            {% if certificate and certificate.student and certificate.student.user %}
+                                {{ certificate.student.user.name }}
+                            {% else %}
+                                Anonymous Student
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="bg-surface-container-low p-4 rounded-xl">
+                        <span class="text-xs font-semibold text-on-surface-variant block mb-1">Course / Degree</span>
+                        <span class="text-lg font-bold text-on-surface">
+                            {% if certificate %}{{ certificate.course }}{% else %}Academic Program{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="bg-surface-container-low p-4 rounded-xl">
+                        <span class="text-xs font-semibold text-on-surface-variant block mb-1">Certificate ID</span>
+                        <span class="text-base font-mono font-bold text-on-surface">{{ certificate_id }}</span>
+                    </div>
+
+                    <div class="bg-surface-container-low p-4 rounded-xl">
+                        <span class="text-xs font-semibold text-on-surface-variant block mb-1">Graduation Year / Issue Date</span>
+                        <span class="text-base font-medium text-on-surface">
+                            {% if certificate %}{{ certificate.graduation_year }} ({{ block_timestamp or 'Recorded' }}){% else %}{{ block_timestamp or 'Recorded' }}{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="bg-surface-container-low p-4 rounded-xl md:col-span-2">
+                        <span class="text-xs font-semibold text-on-surface-variant block mb-1">Issuing Authority</span>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">account_balance</span>
+                            <span class="text-base font-bold text-on-surface">
+                                {% if certificate and certificate.issuer and certificate.issuer.college_name %}
+                                    {{ certificate.issuer.college_name }}
+                                {% elif certificate and certificate.issuer %}
+                                    {{ certificate.issuer.name }}
+                                {% else %}
+                                    Verified Academic Institution
+                                {% endif %}
+                            </span>
+                            <span class="material-symbols-outlined text-secondary ml-auto fill text-xl" title="Verified Issuer">verified</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Blockchain Record & AI Summary -->
+            <div class="lg:col-span-4 flex flex-col gap-6">
+                <!-- Blockchain Record Card -->
+                <div class="bg-primary text-on-primary shadow-xl rounded-2xl p-6 border border-primary-container">
+                    <h3 class="text-lg font-bold flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined">link</span>
+                        <span>Blockchain Record</span>
+                    </h3>
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <span class="opacity-75 block uppercase tracking-wider text-[10px]">Network</span>
+                            <span class="font-bold text-sm text-primary-fixed">Ganache / Ethereum EVM</span>
+                        </div>
+                        <div>
+                            <span class="opacity-75 block uppercase tracking-wider text-[10px]">Transaction Hash</span>
+                            <div class="flex items-center gap-1 mt-0.5">
+                                <span class="font-mono bg-on-primary/10 px-2 py-1 rounded truncate text-[11px] flex-grow">
+                                    {{ tx_hash or '0xRecordedOnChain' }}
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="opacity-75 block uppercase tracking-wider text-[10px]">Issuer Address</span>
+                            <span class="font-mono bg-on-primary/10 px-2 py-1 rounded block truncate text-[11px] mt-0.5">
+                                {{ issuer_address or '0xVerifiedIssuerAccount' }}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="opacity-75 block uppercase tracking-wider text-[10px]">Block Timestamp</span>
+                            <span class="font-medium text-sm text-primary-fixed-dim block mt-0.5">{{ block_timestamp or 'Confirmed' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Verification Summary Card -->
+                <div class="bg-surface-container-lowest verified-shadow rounded-2xl p-6 border border-outline-variant/40 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-3 opacity-10">
+                        <span class="material-symbols-outlined text-6xl text-primary">memory</span>
+                    </div>
+                    <h3 class="text-base font-bold text-on-surface flex items-center gap-2 mb-2 relative z-10">
+                        <span class="material-symbols-outlined text-primary">memory</span>
+                        <span>Cryptographic Validation</span>
+                    </h3>
+                    <p class="text-xs text-on-surface-variant relative z-10 mb-3 leading-relaxed">
+                        The SHA-256 fingerprint of the physical file on disk matches the immutable smart contract record byte-for-byte.
+                    </p>
+                    <div class="bg-surface-container p-3 rounded-xl border border-outline-variant/30 relative z-10">
+                        <div class="flex items-center gap-2 text-secondary">
+                            <span class="material-symbols-outlined text-base fill">done_all</span>
+                            <span class="text-xs font-bold uppercase tracking-wider">Hash Match Confirmed (SHA-256)</span>
+                        </div>
+                        <p class="text-[11px] font-mono text-on-surface-variant mt-1 truncate">
+                            {{ computed_hash or onchain_hash }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if certificate %}
+            <div class="mt-8 text-center flex justify-center gap-4">
+                <a href="{{ url_for('verify.public_download', certificate_id=certificate_id) }}" class="bg-surface-container-lowest text-primary border border-outline-variant hover:bg-surface-container-low transition-colors text-sm font-semibold px-6 py-3 rounded-xl shadow-sm inline-flex items-center gap-2">
+                    <span class="material-symbols-outlined text-base">download</span>
+                    <span>Download Certificate File</span>
+                </a>
+            </div>
+        {% endif %}
+
+    {% elif result == 'tampered' %}
+        <!-- Status Banner: TAMPERED -->
+        <div class="bg-error-container text-on-error-container tampered-border rounded-2xl p-8 mb-8 text-center flex flex-col items-center justify-center shadow-lg">
+            <div class="bg-error text-on-error rounded-full p-4 mb-4 inline-flex items-center justify-center">
+                <span class="material-symbols-outlined text-5xl fill">gpp_bad</span>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-error mb-2 tracking-tight">SECURITY ALERT: TAMPERED CERTIFICATE</h1>
+            <p class="text-base max-w-2xl mx-auto font-medium">
+                Cryptographic integrity check failed. The file content does not match the immutable hash registered on the blockchain.
+            </p>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-2xl p-6 md:p-8 border border-error/30 shadow-sm max-w-3xl mx-auto space-y-6">
+            <h2 class="text-lg font-bold text-error flex items-center gap-2">
+                <span class="material-symbols-outlined">warning</span>
+                <span>Tamper Detection Audit Details</span>
+            </h2>
+
+            <div class="space-y-4 text-sm">
+                <div class="p-4 bg-surface-container-low rounded-xl">
+                    <span class="text-xs font-semibold text-on-surface-variant block mb-1">Recomputed File Hash (from current document bytes)</span>
+                    <span class="font-mono text-xs font-bold text-error break-all block">{{ computed_hash or 'Document Missing or Altered' }}</span>
+                </div>
+
+                <div class="p-4 bg-surface-container-low rounded-xl">
+                    <span class="text-xs font-semibold text-on-surface-variant block mb-1">Original Immutable Blockchain Hash (Smart Contract)</span>
+                    <span class="font-mono text-xs font-bold text-secondary break-all block">{{ onchain_hash or (certificate.sha256_hash if certificate else 'N/A') }}</span>
+                </div>
+            </div>
+
+            <div class="bg-error/10 p-4 rounded-xl border border-error/20 text-xs text-error leading-relaxed">
+                <strong>Warning for Employers / Verifiers:</strong> This certificate file has been modified or forged after its issuance. Do not accept this document as proof of credential.
+            </div>
+
+            <div class="text-center pt-2">
+                <a href="{{ url_for('verify.landing') }}" class="inline-flex items-center gap-2 bg-primary text-on-primary px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary-container">
+                    <span class="material-symbols-outlined text-base">arrow_back</span>
+                    <span>Return to Search</span>
+                </a>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- Status Banner: NOT FOUND -->
+        <div class="bg-surface-container-lowest rounded-2xl p-8 mb-8 text-center flex flex-col items-center justify-center border border-outline-variant/50 shadow-sm max-w-2xl mx-auto">
+            <div class="bg-surface-container-high text-outline rounded-full p-4 mb-4 inline-flex items-center justify-center">
+                <span class="material-symbols-outlined text-5xl">search_off</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-bold text-on-surface mb-2">Certificate Not Found</h1>
+            <p class="text-sm text-on-surface-variant mb-6">
+                No certificate with ID <span class="font-mono font-bold text-on-surface">"{{ certificate_id }}"</span> exists in the database or on the blockchain ledger.
+            </p>
+            <a href="{{ url_for('verify.landing') }}" class="inline-flex items-center gap-2 bg-primary text-on-primary px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-primary-container">
+                <span class="material-symbols-outlined text-base">search</span>
+                <span>Search Another ID</span>
+            </a>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

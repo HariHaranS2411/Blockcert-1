@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>{{ current_user.name }} - Resume (BlockCert Verified)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        
+        @media print {
+            body { background: white !important; padding: 0 !important; }
+            .no-print { display: none !important; }
+            .resume-sheet { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; }
+            @page { margin: 1.2cm; size: A4; }
+        }
+    </style>
+</head>
+<body class="text-[#141b2b] min-h-screen py-8 antialiased">
+
+    <!-- Top Action Bar (hidden in print) -->
+    <div class="no-print max-w-4xl mx-auto mb-6 px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-2">
+            <a href="{{ url_for('student.resume_builder') }}" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-xl text-xs font-semibold hover:bg-gray-50 transition-colors flex items-center gap-1.5 shadow-sm">
+                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                <span>Back to AI Resume Maker</span>
+            </a>
+            <span class="text-xs text-gray-500">ATS-Optimized &bull; Blockchain Anchored</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="window.print()" class="bg-[#00236f] text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-[#1e3a8a] transition-all shadow-md flex items-center gap-2 active:scale-95">
+                <span class="material-symbols-outlined text-base">print</span>
+                <span>Print / Save PDF</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Printable Resume Sheet (A4 format) -->
+    <div class="resume-sheet bg-white max-w-4xl mx-auto p-8 md:p-12 rounded-2xl shadow-lg border border-gray-200/80 space-y-6">
+        
+        <!-- Header -->
+        <header class="border-b-2 border-gray-800 pb-5">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-3">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-[#00236f] tracking-tight uppercase">
+                        {{ resume.personal_info.name if resume.personal_info else current_user.name }}
+                    </h1>
+                    <p class="text-sm font-semibold text-gray-700 mt-0.5">
+                        {{ resume.academic.degree if resume.academic else student.degree }} &bull; {{ resume.academic.college if resume.academic else (current_user.college_name or 'BlockCert Institute') }}
+                    </p>
+                </div>
+                <div class="text-xs text-gray-600 space-y-0.5 md:text-right font-medium">
+                    <div>{{ resume.personal_info.email if resume.personal_info else current_user.email }}</div>
+                    <div>{{ resume.personal_info.phone if resume.personal_info else '+91 98765 43210' }} &bull; {{ resume.personal_info.location if resume.personal_info else (current_user.college_name or 'India') }}</div>
+                    <div class="text-[#00236f] font-semibold">
+                        {{ resume.personal_info.github if resume.personal_info else 'github.com/profile' }} &bull; {{ resume.personal_info.linkedin if resume.personal_info else 'linkedin.com/in/profile' }}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Professional Summary -->
+        <section class="space-y-1.5">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-[#00236f] border-b border-gray-300 pb-1">
+                Professional Summary
+            </h2>
+            <p class="text-xs text-gray-700 leading-relaxed text-justify">
+                {{ resume.summary or 'Results-driven software engineering candidate with verified academic credentials and hands-on full-stack development experience.' }}
+            </p>
+        </section>
+
+        <!-- Dynamic Section 1: Education (Prominent for High CGPA, or Standard) -->
+        <section class="space-y-2">
+            <div class="flex justify-between items-center border-b border-gray-300 pb-1">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-[#00236f]">
+                    Education &amp; Academic Honors
+                </h2>
+                {% if student.cgpa and student.cgpa >= 8.5 %}
+                    <span class="text-[10px] font-bold text-[#006e2d] uppercase">Academic Excellence Distiction</span>
+                {% endif %}
+            </div>
+            <div class="flex justify-between items-start text-xs">
+                <div>
+                    <h3 class="font-bold text-gray-900">{{ resume.academic.degree if resume.academic else student.degree }}</h3>
+                    <p class="text-gray-700">{{ resume.academic.college if resume.academic else (current_user.college_name or 'BlockCert Institute') }} &bull; {{ resume.academic.department if resume.academic else student.department }}</p>
+                </div>
+                <div class="text-right">
+                    <span class="font-bold text-gray-900">Graduation: {{ resume.academic.graduation_year if resume.academic else student.graduation_year }}</span>
+                    <p class="text-gray-700 font-semibold">CGPA: <span class="text-[#00236f]">{{ resume.academic.cgpa if resume.academic else (student.cgpa or '8.5') }} / 10.0</span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blockchain-Verified Credentials Section -->
+        <section class="space-y-2.5">
+            <div class="flex justify-between items-center border-b border-gray-300 pb-1">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-[#00236f] flex items-center gap-1.5">
+                    <span>Verified Blockchain Credentials</span>
+                    <span class="material-symbols-outlined text-[#006e2d] text-sm fill">verified</span>
+                </h2>
+                <span class="text-[10px] font-mono text-gray-500">Immutable Ledger Proof</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                {% set certs_to_show = resume.selected_certificates if resume.selected_certificates else certificates %}
+                {% if certs_to_show %}
+                    {% for cert in certs_to_show %}
+                        <div class="p-3 bg-gray-50 border border-emerald-600/30 rounded-xl space-y-1">
+                            <div class="flex justify-between items-start">
+                                <span class="font-bold text-gray-900">{{ cert.course }}</span>
+                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-[#006e2d] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                    <span class="material-symbols-outlined text-[11px] fill">check_circle</span>
+                                    <span>Blockchain Verified ✓</span>
+                                </span>
+                            </div>
+                            <div class="text-[11px] text-gray-600">{{ cert.issuer if cert.issuer is string else (cert.issuer.college_name if cert.issuer else 'BlockCert Academy') }} &bull; {{ cert.year or student.graduation_year }}</div>
+                            <div class="text-[10px] font-mono text-gray-500 truncate pt-0.5">
+                                Ref ID: <a href="{{ url_for('verify.verify_certificate_view', certificate_id=cert.certificate_id, _external=True) }}" target="_blank" class="text-[#00236f] hover:underline font-bold">{{ cert.certificate_id }}</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-xs text-gray-500 p-2">BlockCert Verified Academic Credentials enrolled on Ethereum EVM.</div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Technical Skills Matrix -->
+        <section class="space-y-2">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-[#00236f] border-b border-gray-300 pb-1">
+                Technical Proficiencies
+            </h2>
+            <div class="space-y-1 text-xs">
+                <div>
+                    <span class="font-bold text-gray-900">Languages: </span>
+                    <span class="text-gray-700">{{ resume.technical_skills.languages|join(', ') if (resume.technical_skills and resume.technical_skills.languages) else 'Python, JavaScript, SQL, C++, Java' }}</span>
+                </div>
+                <div>
+                    <span class="font-bold text-gray-900">Frameworks &amp; Tools: </span>
+                    <span class="text-gray-700">{{ resume.technical_skills.frameworks_and_tools|join(', ') if (resume.technical_skills and resume.technical_skills.frameworks_and_tools) else 'Flask, Web3.py, MySQL, Git, Docker, REST APIs, HTML5/Tailwind' }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technical Projects Section -->
+        <section class="space-y-3">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-[#00236f] border-b border-gray-300 pb-1">
+                Selected Engineering Projects
+            </h2>
+
+            {% set projects_to_show = resume.projects if (resume.projects and resume.projects|length > 0) else [
+                {
+                    'title': 'Decentralized Academic Credential Verification Platform',
+                    'role': 'Full Stack Developer',
+                    'technologies': ['Python', 'Flask', 'Web3.py', 'MySQL', 'Solidity'],
+                    'polished_bullets': [
+                        'Architected and implemented an end-to-end credential verification engine utilizing SHA-256 cryptographic document fingerprinting.',
+                        'Integrated smart contract bindings on Ganache EVM, ensuring zero-trust verification and eliminating credential fraud.',
+                        'Engineered responsive web portals for institutional administrators, candidates, and verifying enterprise recruiters.'
+                    ]
+                }
+            ] %}
+
+            <div class="space-y-3 text-xs">
+                {% for proj in projects_to_show %}
+                    <div class="space-y-1">
+                        <div class="flex justify-between items-baseline">
+                            <h3 class="font-bold text-gray-900 text-xs">
+                                {{ proj.title }}
+                                {% if proj.technologies %}
+                                    <span class="font-normal text-gray-600">| <em>{{ proj.technologies|join(', ') if proj.technologies is iterable and proj.technologies is not string else proj.technologies }}</em></span>
+                                {% endif %}
+                            </h3>
+                            <span class="text-[11px] font-semibold text-gray-500">{{ proj.role or 'Lead Developer' }}</span>
+                        </div>
+                        <ul class="list-disc list-outside pl-4 space-y-1 text-gray-700 text-justify">
+                            {% for bullet in proj.polished_bullets %}
+                                <li>{{ bullet }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Footer / Authenticity Seal -->
+        <footer class="border-t border-gray-200 pt-3 flex justify-between items-center text-[10px] text-gray-500">
+            <div class="flex items-center gap-1">
+                <span class="material-symbols-outlined text-[12px] text-[#00236f] fill">verified_user</span>
+                <span>Resume enhanced with BlockCert AI &bull; Immutable Blockchain Identity</span>
+            </div>
+            <div>
+                Verified on Ganache EVM
+            </div>
+        </footer>
+
+    </div>
+
+</body>
+</html>

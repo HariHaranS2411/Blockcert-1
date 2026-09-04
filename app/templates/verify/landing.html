@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}BlockCert - Verify Certificates. Build Careers.{% endblock %}
+
+{% block content %}
+<div class="flex-grow flex flex-col items-center justify-center pt-8 pb-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto w-full">
+    <!-- Hero Section -->
+    <section class="w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+        <div class="flex flex-col gap-6">
+            <div class="inline-flex items-center gap-2 bg-surface-container-high px-3 py-1.5 rounded-full w-fit border border-outline-variant/40">
+                <span class="material-symbols-outlined text-secondary text-sm fill">shield</span>
+                <span class="text-xs font-semibold text-primary uppercase tracking-wider">Blockchain-Backed Trust</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-on-background tracking-tight leading-tight">
+                Verify Certificates.<br/>
+                <span class="text-primary">Build Careers.</span>
+            </h1>
+            <p class="text-lg text-on-surface-variant max-w-xl leading-relaxed">
+                BlockCert leverages immutable Solidity smart contracts and SHA-256 cryptographic hashing to eliminate credential fraud and ensure instant, tamper-proof verification worldwide.
+            </p>
+
+            <!-- Quick Certificate Lookup Form -->
+            <div class="bg-surface-container-lowest p-3 rounded-2xl shadow-md border border-outline-variant/50 max-w-lg">
+                <form action="#" onsubmit="event.preventDefault(); const id = document.getElementById('quick-verify-id').value.trim(); if(id){ window.location.href = '/verify/' + encodeURIComponent(id); }" class="flex flex-col sm:flex-row gap-2">
+                    <div class="relative flex-grow">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+                        <input id="quick-verify-id" type="text" placeholder="Enter Certificate ID (e.g. CERT-2025-0001)" class="w-full pl-10 pr-3 py-3 bg-surface rounded-xl border border-outline-variant/60 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" required />
+                    </div>
+                    <button type="submit" class="bg-primary text-on-primary font-semibold text-sm px-6 py-3 rounded-xl hover:bg-primary-container transition-all active:scale-95 shrink-0 flex items-center justify-center gap-2">
+                        <span>Verify Now</span>
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="flex gap-4 items-center pt-2">
+                {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('auth.signup') }}" class="text-sm font-semibold text-primary hover:underline flex items-center gap-1">
+                        <span>Institution Registration</span>
+                        <span class="material-symbols-outlined text-sm">north_east</span>
+                    </a>
+                    <span class="text-outline-variant">&bull;</span>
+                    <a href="{{ url_for('auth.login') }}" class="text-sm font-semibold text-on-surface-variant hover:text-primary">
+                        Student / Employer Portal
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Hero Visual (Bento-style conceptual cards) -->
+        <div class="relative w-full h-[420px] flex items-center justify-center">
+            <!-- Main Certificate Card -->
+            <div class="bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant/30 p-6 w-full max-w-[380px] absolute z-10 transform -rotate-2 hover:rotate-0 transition-transform duration-300">
+                <div class="flex justify-between items-start mb-4 border-b border-outline-variant/30 pb-3">
+                    <div class="flex flex-col">
+                        <span class="text-lg font-bold text-on-background">B.S. Computer Science</span>
+                        <span class="text-xs text-on-surface-variant">BlockCert Academy</span>
+                    </div>
+                    <div class="bg-secondary-container text-on-secondary-container rounded-full px-3 py-1 flex items-center gap-1 border border-secondary/20">
+                        <span class="material-symbols-outlined text-[14px] fill">check_circle</span>
+                        <span class="text-xs font-semibold">Verified</span>
+                    </div>
+                </div>
+                <div class="space-y-2 mb-4 text-xs">
+                    <div class="flex justify-between text-on-surface-variant">
+                        <span>Recipient:</span>
+                        <span class="font-medium text-on-surface">Alex Johnson</span>
+                    </div>
+                    <div class="flex justify-between text-on-surface-variant">
+                        <span>On-Chain Tx:</span>
+                        <span class="font-mono text-primary truncate max-w-[180px]">0x9a8f...3e21</span>
+                    </div>
+                </div>
+                <div class="flex gap-4 items-center pt-2 border-t border-outline-variant/20">
+                    <div class="w-14 h-14 bg-surface-container rounded-xl flex items-center justify-center border border-outline-variant/30 text-primary">
+                        <span class="material-symbols-outlined text-3xl">qr_code_2</span>
+                    </div>
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-xs font-bold text-on-surface">CERT-2025-0001</span>
+                        <span class="text-[11px] text-on-surface-variant">SHA-256 Fingerprinted</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating Verified Hash Badge -->
+            <div class="bg-primary text-on-primary rounded-xl shadow-2xl p-4 w-[240px] absolute -bottom-2 right-2 md:-right-4 z-20 transform rotate-3 hover:scale-105 transition-transform duration-300 flex items-center gap-3 border border-primary-container">
+                <span class="material-symbols-outlined text-secondary-container text-2xl fill">verified</span>
+                <div class="flex flex-col">
+                    <span class="text-xs font-bold">Ethereum / Ganache</span>
+                    <span class="text-[10px] text-primary-fixed-dim">Zero Trust Architecture</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3-Step Process Bento Grid -->
+    <section class="w-full mt-8">
+        <div class="text-center mb-10">
+            <h2 class="text-2xl md:text-3xl font-bold text-on-background">How BlockCert Guarantees Authenticity</h2>
+            <p class="text-sm text-on-surface-variant mt-2">The blockchain is the immutable source of truth — never trust, always verify.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/40 flex flex-col justify-between">
+                <div class="w-10 h-10 rounded-xl bg-primary-fixed/40 text-primary flex items-center justify-center font-bold mb-4">1</div>
+                <div>
+                    <h3 class="text-base font-bold text-on-surface mb-2">Cryptographic Fingerprint</h3>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">
+                        When an administrator issues a certificate, the system generates a SHA-256 hash directly from the raw document bytes.
+                    </p>
+                </div>
+            </div>
+            <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/40 flex flex-col justify-between">
+                <div class="w-10 h-10 rounded-xl bg-primary-fixed/40 text-primary flex items-center justify-center font-bold mb-4">2</div>
+                <div>
+                    <h3 class="text-base font-bold text-on-surface mb-2">On-Chain Anchor</h3>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">
+                        The certificate ID and hash are anchored immutably onto the Solidity smart contract. No PII is stored on-chain.
+                    </p>
+                </div>
+            </div>
+            <div class="bg-surface-container-lowest p-6 rounded-2xl shadow-sm border border-outline-variant/40 flex flex-col justify-between">
+                <div class="w-10 h-10 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold mb-4">3</div>
+                <div>
+                    <h3 class="text-base font-bold text-on-surface mb-2">Real-Time Verification</h3>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">
+                        Employers scan the QR or search the ID. The file hash is recomputed on the fly and matched against the blockchain record.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

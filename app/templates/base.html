@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% block title %}BlockCert - Blockchain Certificate Verification{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00236f",
+                        "on-primary": "#ffffff",
+                        "primary-container": "#1e3a8a",
+                        "on-primary-container": "#90a8ff",
+                        "primary-fixed": "#dce1ff",
+                        "primary-fixed-dim": "#b6c4ff",
+                        "secondary": "#006e2d",
+                        "on-secondary": "#ffffff",
+                        "secondary-container": "#7cf994",
+                        "on-secondary-container": "#007230",
+                        "secondary-fixed-dim": "#62df7d",
+                        "tertiary": "#5d0004",
+                        "tertiary-container": "#87000a",
+                        "error": "#ba1a1a",
+                        "error-container": "#ffdad6",
+                        "on-error": "#ffffff",
+                        "background": "#f9f9ff",
+                        "on-background": "#141b2b",
+                        "surface": "#f9f9ff",
+                        "surface-dim": "#d3daef",
+                        "surface-bright": "#f9f9ff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f1f3ff",
+                        "surface-container": "#e9edff",
+                        "surface-container-high": "#e1e8fd",
+                        "surface-container-highest": "#dce2f7",
+                        "on-surface": "#141b2b",
+                        "on-surface-variant": "#444651",
+                        "outline": "#757682",
+                        "outline-variant": "#c5c5d3"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "xs": "4px",
+                        "sm": "8px",
+                        "md": "16px",
+                        "lg": "24px",
+                        "xl": "32px",
+                        "xxl": "48px",
+                        "gutter": "16px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "32px",
+                        "max-width": "1280px"
+                    },
+                    fontFamily: {
+                        sans: ["Inter", "sans-serif"]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined.fill, .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .verified-border { border: 1px solid rgba(0, 110, 45, 0.25); }
+        .tampered-border { border: 1px solid rgba(186, 26, 26, 0.3); }
+        .verified-shadow { box-shadow: 0px 2px 4px rgba(0,0,0,0.05); }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col antialiased">
+    <!-- Navigation Bar -->
+    <header class="bg-surface shadow-sm sticky top-0 z-50">
+        <div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-4 max-w-max-width mx-auto">
+            <a href="{{ url_for('verify.landing') }}" class="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity">
+                <span class="material-symbols-outlined text-primary text-[28px] fill" data-icon="verified_user">verified_user</span>
+                <span class="text-2xl font-extrabold text-primary tracking-tight">BlockCert</span>
+            </a>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center gap-6">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="font-medium text-sm {% if request.endpoint == 'admin.dashboard' %}text-primary font-bold bg-surface-container-low px-3 py-2 rounded-lg{% else %}text-on-surface-variant hover:text-primary transition-colors px-3 py-2{% endif %}">Dashboard</a>
+                        <a href="{{ url_for('admin.certificates_list') }}" class="font-medium text-sm {% if request.endpoint == 'admin.certificates_list' %}text-primary font-bold bg-surface-container-low px-3 py-2 rounded-lg{% else %}text-on-surface-variant hover:text-primary transition-colors px-3 py-2{% endif %}">Certificates</a>
+                        <a href="{{ url_for('admin.upload') }}" class="font-medium text-sm {% if request.endpoint == 'admin.upload' %}text-primary font-bold bg-surface-container-low px-3 py-2 rounded-lg{% else %}text-on-surface-variant hover:text-primary transition-colors px-3 py-2{% endif %}">Issue Certificate</a>
+                        <a href="{{ url_for('admin.manage_students') }}" class="font-medium text-sm {% if request.endpoint == 'admin.manage_students' %}text-primary font-bold bg-surface-container-low px-3 py-2 rounded-lg{% else %}text-on-surface-variant hover:text-primary transition-colors px-3 py-2{% endif %}">Manage Students</a>
+                    {% elif current_user.role == 'student' %}
+                        <a href="{{ url_for('student.dashboard') }}" class="font-medium text-sm {% if request.endpoint == 'student.dashboard' %}text-primary font-bold bg-surface-container-low px-3 py-2 rounded-lg{% else %}text-on-surface-variant hover:text-primary transition-colors px-3 py-2{% endif %}">Dashboard</a>
+                        <a href="{{ url_for('student.resume_builder') }}" class="font-medium text-sm {% if request.endpoint in ['student.resume_builder', 'student.resume_preview'] %}text-primary font-bold bg-surface-container-low px-3 py-2 rounded-lg{% else %}text-on-surface-variant hover:text-primary transition-colors px-3 py-2{% endif %} flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[16px] text-primary fill">auto_awesome</span>
+                            <span>AI Resume Maker</span>
+                        </a>
+                    {% elif current_user.role == 'employer' %}
+                        <a href="{{ url_for('employer.dashboard') }}" class="font-medium text-sm {% if request.endpoint == 'employer.dashboard' %}text-primary font-bold bg-surface-container-low px-3 py-2 rounded-lg{% else %}text-on-surface-variant hover:text-primary transition-colors px-3 py-2{% endif %}">Verify Portal</a>
+                        <a href="{{ url_for('employer.history') }}" class="font-medium text-sm {% if request.endpoint == 'employer.history' %}text-primary font-bold bg-surface-container-low px-3 py-2 rounded-lg{% else %}text-on-surface-variant hover:text-primary transition-colors px-3 py-2{% endif %}">Audit History</a>
+                    {% endif %}
+                {% else %}
+                    <a href="{{ url_for('verify.landing') }}" class="font-medium text-sm text-on-surface-variant hover:text-primary transition-colors px-3 py-2">Home</a>
+                {% endif %}
+            </nav>
+
+            <!-- User Status / Auth CTA -->
+            <div class="flex items-center gap-3">
+                {% if current_user.is_authenticated %}
+                    <div class="hidden sm:flex flex-col text-right">
+                        <span class="text-xs font-bold text-on-surface">{{ current_user.name }}</span>
+                        <span class="text-[11px] text-on-surface-variant capitalize font-mono">{{ current_user.role }}</span>
+                    </div>
+                    <a href="{{ url_for('auth.logout') }}" class="border border-outline-variant hover:bg-surface-container-low text-on-surface-variant font-medium text-xs px-3 py-2 rounded-lg transition-colors flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[16px]">logout</span>
+                        <span>Logout</span>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="border border-primary text-primary hover:bg-surface-container-low font-medium text-sm px-4 py-2 rounded-lg transition-colors">Sign In</a>
+                    <a href="{{ url_for('auth.signup') }}" class="bg-primary text-on-primary hover:bg-primary-container font-medium text-sm px-4 py-2 rounded-lg transition-colors shadow-sm">Get Started</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Flash Messages Container -->
+    <div class="max-w-max-width mx-auto w-full px-margin-mobile md:px-margin-desktop pt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-4 p-4 rounded-xl flex items-center justify-between shadow-sm {% if category == 'success' %}bg-secondary-container text-on-secondary-container border border-secondary/30{% elif category in ['error', 'danger'] %}bg-error-container text-on-error-container border border-error/30{% else %}bg-surface-container-high text-on-surface border border-outline-variant{% endif %}">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined {% if category == 'success' %}text-secondary fill{% elif category in ['error', 'danger'] %}text-error fill{% else %}text-primary{% endif %}">
+                                {% if category == 'success' %}check_circle{% elif category in ['error', 'danger'] %}error{% else %}info{% endif %}
+                            </span>
+                            <span class="text-sm font-medium">{{ message }}</span>
+                        </div>
+                        <button onclick="this.parentElement.remove()" class="p-1 hover:opacity-75 transition-opacity">
+                            <span class="material-symbols-outlined text-sm">close</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface-container-lowest border-t border-outline-variant/30 py-8 mt-auto">
+        <div class="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-on-surface-variant">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-[18px] fill">verified_user</span>
+                <span class="font-bold text-primary">BlockCert</span>
+                <span>— Immutable Academic &amp; Credential Verification</span>
+            </div>
+            <div class="flex gap-6">
+                <span>Solidity &bull; Ganache &bull; SHA-256</span>
+                <span>&copy; {{ now_year }} BlockCert Platform</span>
+            </div>
+        </div>
+    </footer>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
