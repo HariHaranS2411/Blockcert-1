@@ -20,7 +20,7 @@ class Config:
     # Upload and QR Code Folders
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', str(BASE_DIR / 'app' / 'static' / 'uploads' / 'certificates'))
     QR_FOLDER = os.environ.get('QR_FOLDER', str(BASE_DIR / 'app' / 'static' / 'uploads' / 'qrcodes'))
-    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH', 16 * 1024 * 1024))  # 16 MB max
+    MAX_CONTENT_LENGTH = int(os.environ.get('MAX_CONTENT_LENGTH') or 16 * 1024 * 1024)
     ALLOWED_EXTENSIONS = {'pdf', 'png', 'jpg', 'jpeg'}
 
     # Blockchain (Ganache / Web3)
