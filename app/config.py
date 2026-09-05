@@ -14,7 +14,12 @@ class Config:
     
     # Database configuration
     # Default to sqlite:///blockcert.db if DATABASE_URL is not set or empty
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f"sqlite:///{BASE_DIR / 'blockcert.db'}"
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+
+    if DATABASE_URL and DATABASE_URL.startswith('mysql://'):
+        DATABASE_URL = DATABASE_URL.replace('mysql://', 'mysql+pymysql://', 1)
+
+    SQLALCHEMY_DATABASE_URI = DATABASE_URL or f"sqlite:///{BASE_DIR / 'blockcert.db'}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Upload and QR Code Folders
