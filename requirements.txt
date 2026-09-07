@@ -12,3 +12,4 @@ PyMySQL>=1.1.0
 cryptography>=42.0.0
 email-validator>=2.1.0
 pytest>=8.0.0
+gunicorn>=23.0.0
